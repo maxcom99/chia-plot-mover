@@ -45,6 +45,7 @@ class PlotMover:
                         logger.warning(f'Main thread: Plot file {plot_path} size is to small. Is it real plot?')
                     else:
                         result.append({'dir': dir_, 'file': file, 'size': size})
+                        break
 
         return result
 
