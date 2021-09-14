@@ -91,7 +91,7 @@ class PlotMover:
                 size = plot.get("size")
                 plot_path = os.path.join(src_dir, file)
 
-                logger.info(f'Main thread: Found plot {plot_path} of size {size // (2 ** 30)} GiB')
+                #logger.info(f'Main thread: Found plot {plot_path} of size {size // (2 ** 30)} GiB')
 
                 dst_dir = self._look_for_destination(size)
 
