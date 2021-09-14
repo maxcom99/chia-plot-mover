@@ -11,7 +11,7 @@ Tested on Ubuntu 20.04
 
 Semi automated:
 ```bash
-git clone https://github.com/maxbanton/chia-plot-mover.git
+git clone https://github.com/LocoSlug/chia-plot-mover.git
 cd chia-plot-mover
 sh install.sh
 cp config-example.yaml config.yaml # Fill config.yaml with your values
