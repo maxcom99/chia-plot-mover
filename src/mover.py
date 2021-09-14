@@ -13,7 +13,7 @@ from src.logger import logger
 class PlotMover:
     CONFIG_FILE_NAME = 'config.yaml'
     SLEEP_PERIOD = 60
-    MIN_K32_PLOT_SIZE = 108 * 10 ** 9
+    MIN_K32_PLOT_SIZE = 11 * 10 ** 9
 
     _config: Dict
 
