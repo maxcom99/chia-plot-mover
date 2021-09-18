@@ -2,4 +2,4 @@
 
 source .venv/bin/activate
 
-python index.py
+sudo nice -n -20 python3 index.py
