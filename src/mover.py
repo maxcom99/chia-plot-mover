@@ -74,6 +74,7 @@ class PlotMover:
         lock.sour.append(src_dir)
 
         logger.info(f'Copy thread: Starting to move plot from {src_path} to {dst_path}')
+        logger.info(f'Move mode: --{move_mode}-- {move_mode == "rsync"}')
         start = time.time()
         shutil.move(src_path, temp_dst_path)
         duration = round(time.time() - start, 1)
