@@ -78,10 +78,12 @@ class PlotMover:
         shutil.move(src_path, temp_dst_path)
         duration = round(time.time() - start, 1)
         if move_mode == 'rsync':
+            logger.info(f'Copying with rsync')
             rsync_param = "rsync -i -vIWhc --compress-level=0 --numeric-ids --inplace --remove-source-files {temp_dst_path} {dst_path}" 
             sub_call = shlex.split(rsync_param)
             subprocess.call(sub_call)
         else:
+            logger.info(f'Copying python shutil move')
             shutil.move(temp_dst_path, dst_path)
         speed = (size / duration) // (2 ** 20)
         logger.info(f'Copy thread: Plot file {src_path} moved, time: {duration} s, avg speed: {speed} MiB/s')
