@@ -12,8 +12,8 @@ from src.logger import logger
 
 class PlotMover:
     CONFIG_FILE_NAME = 'config.yaml'
-    SLEEP_PERIOD = 300
-    MIN_K32_PLOT_SIZE = 108 * 10 ** 9
+    SLEEP_PERIOD = 60
+    MIN_K32_PLOT_SIZE = 11 * 10 ** 9
 
     _config: Dict
 
@@ -36,15 +36,17 @@ class PlotMover:
         result = []
 
         for dir_ in self._config.get('source'):
-            for file in os.listdir(dir_):
-                if file.endswith(".plot") and file not in self._lock.plot:
-                    plot_path = os.path.join(dir_, file)
-                    size = os.path.getsize(plot_path)
+            if dir_ not in self._lock.sour:
+                for file in os.listdir(dir_):
+                    if file.endswith(".plot") and file not in self._lock.plot:
+                        plot_path = os.path.join(dir_, file)
+                        size = os.path.getsize(plot_path)
 
-                    if size < self.MIN_K32_PLOT_SIZE:
-                        logger.warning(f'Main thread: Plot file {plot_path} size is to small. Is it real plot?')
-                    else:
-                        result.append({'dir': dir_, 'file': file, 'size': size})
+                        if size < self.MIN_K32_PLOT_SIZE:
+                            logger.warning(f'Main thread: Plot file {plot_path} size is to small. Is it real plot?')
+                        else:
+                            result.append({'dir': dir_, 'file': file, 'size': size})
+                            break
 
         return result
 
@@ -65,6 +67,7 @@ class PlotMover:
 
         lock.plot.append(plot_file)
         lock.dest.append(dst_dir)
+        lock.sour.append(src_dir)
 
         logger.info(f'Copy thread: Starting to move plot from {src_path} to {dst_path}')
         start = time.time()
@@ -76,6 +79,7 @@ class PlotMover:
 
         lock.plot.remove(plot_file)
         lock.dest.remove(dst_dir)
+        lock.sour.remove(src_dir)
 
     def main(self):
         while True:
@@ -87,7 +91,7 @@ class PlotMover:
                 size = plot.get("size")
                 plot_path = os.path.join(src_dir, file)
 
-                logger.info(f'Main thread: Found plot {plot_path} of size {size // (2 ** 30)} GiB')
+                #logger.info(f'Main thread: Found plot {plot_path} of size {size // (2 ** 30)} GiB')
 
                 dst_dir = self._look_for_destination(size)
 

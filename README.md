@@ -1,5 +1,5 @@
-# Chia Plot Mover
-Little tool to help to move plots across hard drives.
+# Plot Mover
+Little tool to help to move plots across storage locations.
 Assuming you are plotting to one (or multiple) drive and want to move plots to multiple destination drives.
 Script is automatically look for space across specified list of destinations to move plots on.
 Can work with multiple plots at the same time, it will be helpful if speed of creating plots is higher then speed of moving plots to the destinaton
@@ -11,16 +11,16 @@ Tested on Ubuntu 20.04
 
 Semi automated:
 ```bash
-git clone https://github.com/maxbanton/chia-plot-mover.git
-cd chia-plot-mover
+git clone https://github.com/LocoSlug/plot-mover.git
+cd plot-mover
 sh install.sh
 cp config-example.yaml config.yaml # Fill config.yaml with your values
 ```
 
 Manual:
 ```bash
-git clone https://github.com/maxbanton/chia-plot-mover.git
-cd chia-plot-mover
+git clone https://github.com/LocoSlug/plot-mover.git
+cd plot-mover
 python -m venv .venv
 source .venv/bin/activate
 pip install poetry
