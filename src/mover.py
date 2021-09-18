@@ -2,6 +2,8 @@ import os
 import shutil
 import threading
 import time
+import shlex
+import subprocess
 from typing import Dict, List
 
 import yaml
@@ -57,10 +59,12 @@ class PlotMover:
                 return dir_
 
     @staticmethod
-    def move_plot(src_dir, plot_file, dst_dir, size, lock):
+    def move_plot(src_dir, plot_file, dst_dir, size, lock, config):
         src_path = os.path.join(src_dir, plot_file)
         dst_path = os.path.join(dst_dir, plot_file)
         temp_dst_path = dst_path + '.move'
+
+        move_mode = config.get('mode')
 
         if os.path.isfile(dst_path):
             raise Exception(f'Copy thread: Plot file {dst_path} already exists. Duplicate?')
@@ -73,7 +77,12 @@ class PlotMover:
         start = time.time()
         shutil.move(src_path, temp_dst_path)
         duration = round(time.time() - start, 1)
-        shutil.move(temp_dst_path, dst_path)
+        if move_mode == 'rsync':
+            rsync_param = "rsync -i -vIWhc --compress-level=0 --numeric-ids --inplace --remove-source-files {temp_dst_path} {dst_path}" 
+            sub_call = shlex.split(rsync_param)
+            subprocess.call(sub_call)
+        else:
+            shutil.move(temp_dst_path, dst_path)
         speed = (size / duration) // (2 ** 20)
         logger.info(f'Copy thread: Plot file {src_path} moved, time: {duration} s, avg speed: {speed} MiB/s')
 
@@ -96,7 +105,7 @@ class PlotMover:
                 dst_dir = self._look_for_destination(size)
 
                 if dst_dir:
-                    thread = threading.Thread(target=self.move_plot, args=(src_dir, file, dst_dir, size, self._lock))
+                    thread = threading.Thread(target=self.move_plot, args=(src_dir, file, dst_dir, size, self._lock, self._config))
                     thread.start()
                 else:
                     logger.warning(f'Main thread: No destination available for plot {plot_path}')
