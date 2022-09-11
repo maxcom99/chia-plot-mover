@@ -15,13 +15,14 @@ from src.logger import logger
 class PlotMover:
     CONFIG_FILE_NAME = 'config.yaml'
     SLEEP_PERIOD = 60
-    MIN_K32_PLOT_SIZE = 11 * 10 ** 9
+    MIN_K32_PLOT_SIZE = 108 * 10 ** 9
 
     _config: Dict
 
     def __init__(self):
         self._config = self._read_config()
         self._lock = Lock()
+        self._mutex = threading.Lock()
 
     def _read_config(self):
         current_dir = os.path.dirname(__file__)
@@ -59,7 +60,7 @@ class PlotMover:
                 return dir_
 
     @staticmethod
-    def move_plot(src_dir, plot_file, dst_dir, size, lock, config):
+    def move_plot(self, src_dir, plot_file, dst_dir, size, lock):
         src_path = os.path.join(src_dir, plot_file)
         dst_path = os.path.join(dst_dir, plot_file)
         temp_dst_path = dst_path + '.move'
@@ -69,9 +70,12 @@ class PlotMover:
         if os.path.isfile(dst_path):
             raise Exception(f'Copy thread: Plot file {dst_path} already exists. Duplicate?')
 
-        lock.plot.append(plot_file)
-        lock.dest.append(dst_dir)
-        lock.sour.append(src_dir)
+        self._mutex.acquire()
+        if dst_dir not in self._lock.dest:
+            lock.plot.append(plot_file)
+            lock.dest.append(dst_dir)
+            lock.sour.append(src_dir)
+        self._mutex.release()
 
         logger.info(f'Copy thread: Starting to move plot from {src_path} to {dst_path}')
         start = time.time()
@@ -102,6 +106,8 @@ class PlotMover:
 
                 #logger.info(f'Main thread: Found plot {plot_path} of size {size // (2 ** 30)} GiB')
 
+                time.sleep(self._config.get('debounce'))
+
                 dst_dir = self._look_for_destination(size)
 
                 if dst_dir:
@@ -109,7 +115,7 @@ class PlotMover:
                     thread.start()
                 else:
                     logger.warning(f'Main thread: No destination available for plot {plot_path}')
-                    time.sleep(self.SLEEP_PERIOD)
+                    time.sleep(self._config.get('sleep'))
             else:
-                logger.info(f'Main thread: No plots found. Sleep for {self.SLEEP_PERIOD}s')
-                time.sleep(self.SLEEP_PERIOD)
+                logger.info(f"Main thread: No plots found. Sleep for {self._config.get('sleep')}s")
+                time.sleep(self._config.get('sleep'))
